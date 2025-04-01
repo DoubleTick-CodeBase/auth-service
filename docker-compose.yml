@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  api:
+    container_name: service-api
+    build:
+      context: .
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      DATABASE_URL: "postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database:${DATABASE_PORT:-5432}/${DATABASE_NAME}?schema=public"
+      CACHE_URL: "redis://${CACHE_USERNAME}:${CACHE_PASSWORD}@cache:${CACHE_PORT:-6379}"
+    depends_on:
+      cache:
+        condition: service_started
+      database:
+        condition: service_healthy
+
+  cache:
+    container_name: service-cache
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - "${CACHE_PORT:-6379}:6379"
+    environment:
+      REDIS_PASSWORD: ${CACHE_PASSWORD}
+      REDIS_USERNAME: ${CACHE_USERNAME}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    command:
+      - /bin/sh
+      - -c
+      - redis-server --requirepass "$${CACHE_PASSWORD:?REDIS_PASSWORD variable is not set}"
+    volumes: 
+      - ${CACHE_VOLUME:-cache_data}:/data
+
+  database:
+    container_name: service-database
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ${DATABASE_VOLUME:-pg_data}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
