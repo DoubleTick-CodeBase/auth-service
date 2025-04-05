@@ -11,10 +11,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": "./",
-    "paths": {
-      "$/*": ["src/*"]
-    }
+    "baseUrl": "./"
   },
   "ts-node": {
     "esm": true,

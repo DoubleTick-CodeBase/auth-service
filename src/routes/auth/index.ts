@@ -1,10 +1,10 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { v4 } from "uuid";
 import { sign } from "hono/jwt";
-import prisma from "$/lib/prisma-client.js";
-import { checkPassword, hashPassword } from "$/utils/passwords.js";
-import { signin, signup } from "$/routes/auth/route.js";
-import logger from "$/utils/logger.js";
+import prisma from "../../lib/prisma-client.js";
+import { checkPassword, hashPassword } from "../../utils/passwords.js";
+import { signin, signup } from "./route.js";
+import logger from "../../utils/logger.js";
 
 const authRouter = new OpenAPIHono();
 

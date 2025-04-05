@@ -14,3 +14,4 @@ deploy.yml
 migration.sql
 migration_lock.toml
 init.sh
+.dockerignore

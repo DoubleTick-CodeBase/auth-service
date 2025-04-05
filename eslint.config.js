@@ -24,6 +24,7 @@ export default [
       "migration.sql",
       "migration_lock.toml",
       "init.sh",
+      ".dockerignore",
     ],
     files: ["**/*.{js,mjs,cjs,ts,tsx}"],
     languageOptions: {
