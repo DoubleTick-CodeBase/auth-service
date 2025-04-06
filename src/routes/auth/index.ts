@@ -4,7 +4,7 @@ import { sign } from "hono/jwt";
 import prisma from "../../lib/prisma-client.js";
 import { checkPassword, hashPassword } from "../../utils/passwords.js";
 import { signin, signup } from "./route.js";
-import logger from "../../utils/logger.js";
+import logger from "../../lib/logging-client.js";
 
 const authRouter = new OpenAPIHono();
 

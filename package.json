@@ -1,5 +1,5 @@
 {
-  "name": "hono-api-template",
+  "name": "auth-service",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
