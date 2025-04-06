@@ -1,18 +1,27 @@
 services:
   api:
-    container_name: service-api
+    container_name: auth-service
     build:
       context: .
     ports:
       - "${PORT:-3000}:3000"
     environment:
       DATABASE_URL: "postgres://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@database:5432/${DATABASE_NAME}?schema=public"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m" 
+        max-file: "3"  
+    labels:
+      log_type: "application"  
     depends_on:
       database:
         condition: service_healthy
+    networks:
+      - microservice-network
 
   database:
-    container_name: service-database
+    container_name: auth-database
     image: postgres:15-alpine
     ports:
       - "${DATABASE_PORT:-5432}:5432"
@@ -27,3 +36,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - microservice-network
+
+networks:
+  microservice-network:
+    driver: bridge
+    name: microservice-network  

@@ -8,45 +8,17 @@ import logger from "../../utils/logger.js";
 
 const authRouter = new OpenAPIHono();
 
-authRouter.use("*", async (c, next) => {
-  const start = Date.now();
-  const requestId = crypto.randomUUID();
-
-  logger.info({
-    requestId,
-    operation: c.req.path,
-    method: c.req.method,
-    message: "Request started",
-  });
-
-  await next();
-
-  const duration = Date.now() - start;
-  logger.info({
-    requestId,
-    operation: c.req.path,
-    method: c.req.method,
-    durationMs: duration,
-    status: c.res.status,
-    message: "Request completed",
-  });
-});
-
 authRouter.openapi(signin, async (ctx) => {
   const requestId = crypto.randomUUID();
-  const { email, password } = ctx.req.valid("json");
+  const start = Date.now();
 
-  logger.debug({
-    requestId,
-    operation: "signin",
-    email: email,
-    message: "Signin attempt started",
-  });
+  const { email, password } = ctx.req.valid("json");
 
   if (!process.env.JWT_SECRET) {
     logger.error({
       requestId,
       operation: "signin",
+      durationMs: Date.now() - start,
       message: "JWT_SECRET not configured",
     });
     return ctx.text("Internal server error", 500);
@@ -58,10 +30,12 @@ authRouter.openapi(signin, async (ctx) => {
     });
 
     if (!auth) {
-      logger.warn({
+      logger.error({
         requestId,
-        operation: "signin",
         email,
+        operation: "signin",
+        durationMs: Date.now() - start,
+        status: 404,
         message: "Auth record not found",
       });
       return ctx.text("Auth record not found", 404);
@@ -82,8 +56,11 @@ authRouter.openapi(signin, async (ctx) => {
 
       logger.info({
         requestId,
-        operation: "signin",
+        email,
         authId: auth.id,
+        operation: "signin",
+        durationMs: Date.now() - start,
+        status: 200,
         message: "Successful authentication",
       });
 
@@ -91,8 +68,11 @@ authRouter.openapi(signin, async (ctx) => {
     } else {
       logger.warn({
         requestId,
-        operation: "signin",
         email,
+        operation: "signin",
+        authId: auth.id,
+        durationMs: Date.now() - start,
+        status: 403,
         message: "Invalid password provided",
       });
       return ctx.text("Invalid password", 403);
@@ -101,6 +81,9 @@ authRouter.openapi(signin, async (ctx) => {
     logger.error({
       requestId,
       operation: "signin",
+      email,
+      durationMs: Date.now() - start,
+      status: 500,
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       message: "Authentication error",
@@ -111,19 +94,15 @@ authRouter.openapi(signin, async (ctx) => {
 
 authRouter.openapi(signup, async (ctx) => {
   const requestId = crypto.randomUUID();
-  const { email, password } = ctx.req.valid("json");
+  const start = Date.now();
 
-  logger.debug({
-    requestId,
-    operation: "signup",
-    email,
-    message: "Signup attempt started",
-  });
+  const { email, password } = ctx.req.valid("json");
 
   if (!process.env.JWT_SECRET) {
     logger.error({
       requestId,
       operation: "signup",
+      durationMs: Date.now() - start,
       message: "JWT_SECRET not configured",
     });
     return ctx.text("Internal server error", 500);
@@ -137,7 +116,9 @@ authRouter.openapi(signup, async (ctx) => {
         requestId,
         operation: "signup",
         email,
-        message: "Auth already exists",
+        durationMs: Date.now() - start,
+        status: 409,
+        message: "Email already exists",
       });
       return ctx.text("Auth already exists", 409);
     }
@@ -161,7 +142,10 @@ authRouter.openapi(signup, async (ctx) => {
       requestId,
       operation: "signup",
       authId: auth.id,
-      message: "New user created successfully",
+      email,
+      durationMs: Date.now() - start,
+      status: 200,
+      message: "Successful user creation",
     });
 
     return ctx.json({ token, authId: auth.id }, 200);
@@ -169,9 +153,12 @@ authRouter.openapi(signup, async (ctx) => {
     logger.error({
       requestId,
       operation: "signup",
+      email,
+      durationMs: Date.now() - start,
+      status: 500,
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
-      message: "User creation failed",
+      message: "User creation error",
     });
     return ctx.text("Internal Server Error", 500);
   }

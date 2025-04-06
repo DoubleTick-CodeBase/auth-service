@@ -22,7 +22,7 @@ const logger = pino({
       status: res.status,
     }),
   },
-  timestamp: () => `,"@timestamp":"${new Date().toISOString()}"`,
+  timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
 });
 
 export default logger;
