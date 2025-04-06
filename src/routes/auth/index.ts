@@ -14,8 +14,11 @@ authRouter.openapi(signin, async (ctx) => {
 
   const { email, password } = ctx.req.valid("json");
 
+  const method = ctx.req.raw.method;
+
   if (!process.env.JWT_SECRET) {
     logger.error({
+      method,
       requestId,
       operation: "signin",
       durationMs: Date.now() - start,
@@ -31,6 +34,7 @@ authRouter.openapi(signin, async (ctx) => {
 
     if (!auth) {
       logger.error({
+        method,
         requestId,
         email,
         operation: "signin",
@@ -55,6 +59,7 @@ authRouter.openapi(signin, async (ctx) => {
       );
 
       logger.info({
+        method,
         requestId,
         email,
         authId: auth.id,
@@ -67,6 +72,7 @@ authRouter.openapi(signin, async (ctx) => {
       return ctx.json({ token, authId: auth.id }, 200);
     } else {
       logger.warn({
+        method,
         requestId,
         email,
         operation: "signin",
@@ -79,6 +85,7 @@ authRouter.openapi(signin, async (ctx) => {
     }
   } catch (error) {
     logger.error({
+      method,
       requestId,
       operation: "signin",
       email,
@@ -98,8 +105,11 @@ authRouter.openapi(signup, async (ctx) => {
 
   const { email, password } = ctx.req.valid("json");
 
+  const method = ctx.req.raw.method;
+
   if (!process.env.JWT_SECRET) {
     logger.error({
+      method,
       requestId,
       operation: "signup",
       durationMs: Date.now() - start,
@@ -113,6 +123,7 @@ authRouter.openapi(signup, async (ctx) => {
 
     if (existingAuth) {
       logger.warn({
+        method,
         requestId,
         operation: "signup",
         email,
@@ -139,6 +150,7 @@ authRouter.openapi(signup, async (ctx) => {
     );
 
     logger.info({
+      method,
       requestId,
       operation: "signup",
       authId: auth.id,
@@ -151,6 +163,7 @@ authRouter.openapi(signup, async (ctx) => {
     return ctx.json({ token, authId: auth.id }, 200);
   } catch (error) {
     logger.error({
+      method,
       requestId,
       operation: "signup",
       email,
