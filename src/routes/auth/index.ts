@@ -51,6 +51,7 @@ authRouter.openapi(signin, async (ctx) => {
       const token = await sign(
         {
           userId: auth.id,
+          email: auth.email,
           exp:
             Math.floor(Date.now() / 1000) +
             (Number(process.env.JWT_EXPIRATION) || 1200),
@@ -142,6 +143,7 @@ authRouter.openapi(signup, async (ctx) => {
     const token = await sign(
       {
         authId: auth.id,
+        email: auth.email,
         exp:
           Math.floor(Date.now() / 1000) +
           (Number(process.env.JWT_EXPIRATION) || 1200),
